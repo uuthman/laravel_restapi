@@ -5,12 +5,15 @@ namespace App;
 
 
 use App\Scopes\SellerScope;
+use App\Transformers\SellerTransformer;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Seller extends User
 {
     //
     use SoftDeletes;
+
+    public $transformer = SellerTransformer::class;
 
     protected static function boot()
     {

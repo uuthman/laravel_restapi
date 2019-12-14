@@ -20,6 +20,7 @@ class ProductSeeder extends Seeder
 
         Product::truncate();
         DB::table('category_product')->truncate();
+        Product::flushEventListeners();
 
         $productsQuantity = 1000;
 

@@ -18,7 +18,7 @@ class TransactionSeeder extends Seeder
 
 
         Transaction::truncate();
-
+        Transaction::flushEventListeners();
 
 
 

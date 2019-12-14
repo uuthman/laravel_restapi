@@ -19,6 +19,7 @@ class CategorySeeder extends Seeder
 
         Category::truncate();
 
+        Category::flushEventListeners();
 
         $categoriesQuantity = 30;
 

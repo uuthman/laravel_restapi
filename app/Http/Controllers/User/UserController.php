@@ -5,12 +5,25 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Mail\UserCreated;
+use App\Transformers\UserTransformer;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use phpDocumentor\Reflection\Types\Parent_;
 
 class UserController extends ApiController
 {
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->middleware('transform.input:' . UserTransformer::class)->only(['store','update']);
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -132,5 +145,28 @@ class UserController extends ApiController
         $user->delete();
 
         return $this->showOne($user);
+    }
+
+    public function verify($token){
+        $user = User::where('verification_token',$token)->firstOrFail();
+
+        $user->verified = User::VERIFIED_USER;
+        $user->verification_token = null;
+
+        $user->save();
+
+        return $this->showMessage('The account has been verified successfully');
+    }
+
+    public function resend(User $user){
+        if ($user->isVerified()){
+            return $this->errorResponse('This user is already verified',409);
+        }
+
+        retry(5,function () use ($user){
+            Mail::to($user)->send(new UserCreated($user));
+        },100);
+
+        return $this->showMessage('The verification email has been resent');
     }
 }
